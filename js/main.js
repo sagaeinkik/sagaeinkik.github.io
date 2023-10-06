@@ -9,24 +9,22 @@ let clearAllButton = document.getElementById("clearbutton"); //rensa-knapp som r
 
 
 // -*- Händelsehantering -*-
-toDoTextField.addEventListener("keyup", inputControl, false);
-addButton.addEventListener("click", addListItems, false);
-clearAllButton.addEventListener("click", clearAll, false);
-window.onload = startUp;
+toDoTextField.addEventListener("keyup", inputControl, false); //triggas när man skriver i textfältet av att man släpper tangent
+addButton.addEventListener("click", addListItems, false); //triggas av att man klickar på Lägg till-knapp
+clearAllButton.addEventListener("click", clearAll, false); //triggas av att man klickar på rensa-knapp
+window.onload = startUp; //triggas så fort sidan laddas
 
 // -*- Funktioner -*-
 
-/* Körs direkt när sidan laddats in. Avaktiverar knappen för att lägga till items, och anropar funktion som hämtar det vi lagrat
-i storage så det hänger kvar på skärmen. */
+// Avaktiverar knappen för att lägga till items, och anropar funktion som hämtar det vi lagrat i storage så det hänger kvar på skärmen. 
 function startUp() {
     console.log("Sidan laddad");
     disableButton();
     getStorage();
 }
 
-// Kontrollerar input att det är mer än 5 tecken
+// Kontrollerar input att det är mer än 5 tecken. Om ja, aktivera lägg till-knappen. om nej, avaktivera knappen och skriv text i span-element
 function inputControl() {
-    console.log("kontrollerar");
     let toDoItem = toDoTextField.value;
     if (toDoItem.length > 4) {
         errorMessage.innerHTML = "";
@@ -37,35 +35,47 @@ function inputControl() {
     }
 }
 
-//Lägger till items i vår att göra-lista, rensar fältet efter, uppdaterar lagring
+//Lägger till items i vår att göra-lista, rensar fältet efter, ropar på lagringsfunktionen för att lagra bara aktuella poster
 function addListItems() {
     console.log("Lägger till i lista");
     
     //Skapa nytt element och lägg till i DOM
-    //skapa nytt article-element
     let newTask = document.createElement("article");
-    //skapa ny textnod med det som skrivs
+    //skapa ny textnod med det som skrivs i textfält
     let newTaskText = document.createTextNode(toDoTextField.value);
-    //infoga texten i det nya elementet
+    //infoga texten i det nya elementet och peta in det elementet i section-elementet
     newTask.appendChild(newTaskText);
-    //infoga elementet i section-elementet
+    newTask.className = "task";
     toDoList.appendChild(newTask);
 
     //rensa fältet efteråt, avaktivera knappen:
-    toDoTextField.value = " ";
+    toDoTextField.value = "";
     disableButton();
 
     //Händelsehanterare som tar bort vid klick på att göra-grejer
     newTask.addEventListener("click", function (evtobj) {
         evtobj.target.remove();
+        saveToStorage(); //uppdatera lagring
     });
-    // kallar på funktion som sparar aktuella poster till web storage
-    saveToStorage();
+    
+    saveToStorage(); //uppdatera lagring här med
 }
 
-//spara i web storage
+//spara i web storage 
 function saveToStorage() {
-    console.log("Sparar till local storage")
+    //Hämta alla article-element som har klass task. Detta hämtar hela elementet, tagg och allt, och skapar en Nodelist
+    let allTasks = document.querySelectorAll(".task");
+    //tom array att peta in alla texter i
+    let taskArray = [];
+
+    //for-loop som för varje item i node-listan lägger till bara innehållet i den tomma arrayen
+    for (let i = 0; i < allTasks.length; i++) {
+        taskArray.push(allTasks[i].innerHTML);
+    }
+
+    // Konvertera till JSON-textsträng så det kan lagras
+    let jsonString = JSON.stringify(taskArray);
+    localStorage.setItem("To do: ", jsonString);
 }
 
 //Ladda in från web storage och skriv ut på skärm
