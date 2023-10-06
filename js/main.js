@@ -9,9 +9,9 @@ let clearAllButton = document.getElementById("clearbutton"); //rensa-knapp som r
 
 
 // -*- Händelsehantering -*-
-toDoTextField.addEventListener("keyup", inputControl, false); //triggas när man skriver i textfältet av att man släpper tangent
-addButton.addEventListener("click", addListItems, false); //triggas av att man klickar på Lägg till-knapp
-clearAllButton.addEventListener("click", clearAll, false); //triggas av att man klickar på rensa-knapp
+toDoTextField.addEventListener("keyup", inputControl); //triggas när man skriver i textfältet av att man släpper tangent
+addButton.addEventListener("click", addListItems); //triggas av att man klickar på Lägg till-knapp
+clearAllButton.addEventListener("click", clearAll); //triggas av att man klickar på rensa-knapp
 window.onload = startUp; //triggas så fort sidan laddas
 
 // -*- Funktioner -*-
@@ -25,6 +25,7 @@ function startUp() {
 // Kontrollerar input att det är mer än 5 tecken. Om ja, aktivera lägg till-knappen. om nej, avaktivera knappen och skriv text i span-element
 function inputControl() {
     let toDoItem = toDoTextField.value;
+
     if (toDoItem.length > 4) {
         errorMessage.innerHTML = "";
         addButton.disabled = false;
@@ -36,7 +37,6 @@ function inputControl() {
 
 //Lägger till items i vår att göra-lista, rensar fältet efter, ropar på lagringsfunktionen för att lagra bara aktuella poster
 function addListItems() {
-    console.log("Lägger till i lista");
 
     //Skapa nytt element och lägg till i DOM
     let newTask = document.createElement("article");
@@ -51,27 +51,26 @@ function addListItems() {
     toDoTextField.value = "";
     disableButton();
 
-    //Händelsehanterare som tar bort vid klick på att göra-grejer
+    //Händelsehanterare som tar bort vid klick på to Do-grejer
     newTask.addEventListener("click", function (evtobj) {
         evtobj.target.remove();
-        saveToStorage(); //uppdatera lagring
     });
 
-    saveToStorage(); //uppdatera lagring här med
+    saveToStorage(); //uppdatera lagringen
 }
 
-//spara i web storage 
+//spara aktuella poster i web storage
 function saveToStorage() {
     //Hämta alla article-element som har klass task. Detta hämtar hela elementet, tagg och allt, och skapar en Nodelist
     let allTasks = document.querySelectorAll(".task");
     //tom array att peta in alla texter i
     let taskArray = [];
 
-    //for-loop som för varje item i node-listan lägger till bara innehållet i den tomma arrayen
+    //for-loop som för varje item i node-listan lägger till bara article-elementens textinnehåll i den tomma arrayen
     for (let i = 0; i < allTasks.length; i++) {
         taskArray.push(allTasks[i].innerHTML);
     }
-    // Konvertera till JSON-textsträng så det kan lagras
+    // Konvertera till JSON-textsträng, lagra
     let jsonString = JSON.stringify(taskArray);
     localStorage.setItem("To do:", jsonString);
 }
@@ -80,29 +79,36 @@ function saveToStorage() {
 function getStorage() {
     //Hämta grejerna från lagring och konvertera till array
     let taskArray = JSON.parse(localStorage.getItem("To do:"));
-    //loop som lägger till varje item i arrayen som ett nytt article-element i DOM
-    for (let i = 0; i < taskArray.length; i++) {
-        //återanvänder koden från lägg till-funktionen med liten ändring för [i]
-        let newTask = document.createElement("article");
-        let newTaskText = document.createTextNode(taskArray[i]);
-        newTask.appendChild(newTaskText);
-        newTask.className = "task";
-        toDoList.appendChild(newTask);
-        //Händelsehanterare igen eftersom annars kan man inte klicka och radera om man har refreshat sidan
-        newTask.addEventListener("click", function (evtobj) {
-            evtobj.target.remove();
-            saveToStorage();
-        });
+    //OM det finns items i taskArray, kör for-loop som skapar element för varje item och lägger till på skärmen
+    if (taskArray !== null) {
+        for (let i = 0; i < taskArray.length; i++) {
+            //återanvänder koden från lägg till-funktionen med liten ändring för [i]
+            let newTask = document.createElement("article");
+            let newTaskText = document.createTextNode(taskArray[i]);
+            newTask.appendChild(newTaskText);
+            newTask.className = "task";
+            toDoList.appendChild(newTask);
+            //Händelsehanterare igen eftersom annars kan man inte klicka och radera om man har refreshat sidan
+            newTask.addEventListener("click", function (evtobj) {
+                evtobj.target.remove();
+                saveToStorage(); //uppdatera lagring inuti for-loopen, annars kommer posterna man raderat tillbaka
+            });
+        }
     }
-
-    console.log(taskArray);
-
-    saveToStorage();
+    saveToStorage(); //uppdatera lagring så allt är synkat annars kommer poster tillbaka vid refresh
 }
 
 //Funktion som rensar allt på skärm och lagring:
 function clearAll() {
-    console.log("clearing storage");
+    //hämta alla article element igen, lägg i node-list
+    const tasks = toDoList.querySelectorAll("article");
+
+    // om vi har några items i node-list, ta bort från DOM och rensa storage
+    if (tasks.length !== null) {
+        tasks.forEach((task) => task.remove());
+        localStorage.clear();
+    }
+
 }
 
 //funktion som inaktiverar lägg till-knappen
