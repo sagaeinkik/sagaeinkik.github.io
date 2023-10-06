@@ -1,6 +1,4 @@
-# Labbgrund till Moment 4 i kursen DT084G, Introduktion till programmering i JavaScript
-Använd dessa filer som grund till din laboration.
-
+# Moment 4 i kursen DT084G, Introduktion till programmering i JavaScript
 
 ## Om uppgiften 
 I denna uppgift ska vi med hjälp av JavaScript manipulera DOM (*Document Object Model*).  
