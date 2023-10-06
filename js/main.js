@@ -20,7 +20,7 @@ window.onload = startUp;
 i storage så det hänger kvar på skärmen. */
 function startUp() {
     console.log("Sidan laddad");
-    addButton.disabled = true;
+    disableButton();
     getStorage();
 }
 
@@ -33,15 +33,34 @@ function inputControl() {
         addButton.disabled = false;
     } else {
         errorMessage.innerHTML = "Måste ha mer än fem tecken!";
-        addButton.disabled = true;
+        disableButton();
     }
 }
 
 //Lägger till items i vår att göra-lista, rensar fältet efter, uppdaterar lagring
 function addListItems() {
     console.log("Lägger till i lista");
+    
+    //Skapa nytt element och lägg till i DOM
+    //skapa nytt article-element
+    let newTask = document.createElement("article");
+    //skapa ny textnod med det som skrivs
+    let newTaskText = document.createTextNode(toDoTextField.value);
+    //infoga texten i det nya elementet
+    newTask.appendChild(newTaskText);
+    //infoga elementet i section-elementet
+    toDoList.appendChild(newTask);
 
-    saveToStorage()
+    //rensa fältet efteråt, avaktivera knappen:
+    toDoTextField.value = " ";
+    disableButton();
+
+    //Händelsehanterare som tar bort vid klick på att göra-grejer
+    newTask.addEventListener("click", function (evtobj) {
+        evtobj.target.remove();
+    });
+    // kallar på funktion som sparar aktuella poster till web storage
+    saveToStorage();
 }
 
 //spara i web storage
@@ -59,4 +78,9 @@ function getStorage() {
 //Funktion som rensar allt på skärm och lagring:
 function clearAll() {
     console.log("clearing storage");
+}
+
+//funktion som inaktiverar lägg till-knappen
+function disableButton() {
+    addButton.disabled = true;
 }
