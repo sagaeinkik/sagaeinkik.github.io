@@ -18,7 +18,6 @@ window.onload = startUp; //triggas så fort sidan laddas
 
 // Avaktiverar knappen för att lägga till items, och anropar funktion som hämtar det vi lagrat i storage så det hänger kvar på skärmen. 
 function startUp() {
-    console.log("Sidan laddad");
     disableButton();
     getStorage();
 }
@@ -38,7 +37,7 @@ function inputControl() {
 //Lägger till items i vår att göra-lista, rensar fältet efter, ropar på lagringsfunktionen för att lagra bara aktuella poster
 function addListItems() {
     console.log("Lägger till i lista");
-    
+
     //Skapa nytt element och lägg till i DOM
     let newTask = document.createElement("article");
     //skapa ny textnod med det som skrivs i textfält
@@ -57,7 +56,7 @@ function addListItems() {
         evtobj.target.remove();
         saveToStorage(); //uppdatera lagring
     });
-    
+
     saveToStorage(); //uppdatera lagring här med
 }
 
@@ -72,15 +71,31 @@ function saveToStorage() {
     for (let i = 0; i < allTasks.length; i++) {
         taskArray.push(allTasks[i].innerHTML);
     }
-
     // Konvertera till JSON-textsträng så det kan lagras
     let jsonString = JSON.stringify(taskArray);
-    localStorage.setItem("To do: ", jsonString);
+    localStorage.setItem("To do:", jsonString);
 }
 
 //Ladda in från web storage och skriv ut på skärm
 function getStorage() {
-    console.log("Hämtar från storage")
+    //Hämta grejerna från lagring och konvertera till array
+    let taskArray = JSON.parse(localStorage.getItem("To do:"));
+    //loop som lägger till varje item i arrayen som ett nytt article-element i DOM
+    for (let i = 0; i < taskArray.length; i++) {
+        //återanvänder koden från lägg till-funktionen med liten ändring för [i]
+        let newTask = document.createElement("article");
+        let newTaskText = document.createTextNode(taskArray[i]);
+        newTask.appendChild(newTaskText);
+        newTask.className = "task";
+        toDoList.appendChild(newTask);
+        //Händelsehanterare igen eftersom annars kan man inte klicka och radera om man har refreshat sidan
+        newTask.addEventListener("click", function (evtobj) {
+            evtobj.target.remove();
+            saveToStorage();
+        });
+    }
+
+    console.log(taskArray);
 
     saveToStorage();
 }
