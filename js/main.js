@@ -54,6 +54,7 @@ function addListItems() {
     //Händelsehanterare som tar bort vid klick på to Do-grejer
     newTask.addEventListener("click", function (evtobj) {
         evtobj.target.remove();
+        saveToStorage(); //uppdatera lagringen här också så ingenting kommer tillbaka vid refresh
     });
 
     saveToStorage(); //uppdatera lagringen
